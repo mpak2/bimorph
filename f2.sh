@@ -6,5 +6,7 @@
 #riscv64-linux-gnu-gcc -v -o main main.cpp && rv-jit main
 #riscv64-linux-gnu-g++ -Os main.cpp -v -o main && spike pk main #rv-sim main
 #riscv64-linux-gnu-gcc -lstdc++ -std=c++14 -lm main.cpp -v -o main && spike pk main #rv-jit main
-riscv64-unknown-elf-gcc -static -v --save-temps -std=c++14 bmf.cpp -o bmf -lstdc++ -lm && rv-jit bmf #spike pk main
 #riscv64-unknown-elf-gcc -lstdc++ -std=c++14 -lm main.cpp -v -o main && spike pk main #rv-jit main
+
+#riscv64-unknown-elf-gcc -static -v --save-temps -std=c++14 bmf.cpp -o bmf.riscv -lstdc++ -lm && rv-jit bmf #spike pk main
+gcc -static -v -std=c++14 bmf.cpp -o bmf.x86 -lstdc++ -lm && ./bmf.x86
