@@ -18,12 +18,10 @@ int mpre(Tblock row, string comment, int line, string prefix = "", string key = 
 		}()){ //mpre("ОШИБКА получения ключа", __LINE__);
 	}else{*/
 		std::cerr << prefix << num << " => " << "( // __" << to_string(line) << "__ " << comment << "\n";
-		//for(TMs::iterator itr = row.begin(); itr != row.end(); itr++){
-			std::cerr << prefix << "\t[bmf]=>" << row.bmf.to_ulong() << " (" +row.bmf.to_string() +")," << endl;
-			std::cerr << prefix << "\t[val]=>" << to_string(row.val.to_ulong()) << " (" +row.val.to_string() +")," << endl;
-			std::cerr << prefix << "\t[offset]=>" << to_string(row.offset.to_ulong()) << " (" +row.offset.to_string() +")," << endl;
-		//};
-		std::cerr << prefix << ")\n";
+		for(int i = 0; i < BLOCK_SIZE; i++){
+			Taddr addr = row[i];
+			std::cerr << prefix << "\t[bmf]=>" << addr.to_ulong() << " (" +addr.to_string() +")," << endl;
+		}; std::cerr << prefix << ")\n";
 	//}
 	return 1;
 }
@@ -39,11 +37,8 @@ int mpre(Tstair row, string comment, int line, string prefix = "", string key = 
 		}()){ //mpre("ОШИБКА получения ключа", __LINE__);
 	}else{*/
 		std::cerr << prefix << num << " => " << "( // __" << to_string(line) << "__ " << comment << "\n";
-		//for(TMs::iterator itr = row.begin(); itr != row.end(); itr++){
-			std::cerr << prefix << "\t[bmf]=>" << row.bmf.to_ulong() << " (" +row.bmf.to_string() +")," << endl;
-			std::cerr << prefix << "\t[addr]=>" << to_string(row.addr.to_ulong()) << " (" +row.addr.to_string() +")," << endl;
-			std::cerr << prefix << "\t[offset]=>" << to_string(row.offset.to_ulong()) << " (" +row.offset.to_string() +")," << endl;
-		//};
+		std::cerr << prefix << "\t[addr]=>" << to_string(row.addr.to_ulong()) << " (" +row.addr.to_string() +")," << endl;
+		std::cerr << prefix << "\t[offset]=>" << to_string(row.offset.to_ulong()) << " (" +row.offset.to_string() +")," << endl;
 		std::cerr << prefix << ")\n";
 	//}
 	return 1;
