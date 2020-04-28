@@ -10,5 +10,8 @@
 
 #riscv64-unknown-elf-gcc -static -v --save-temps -std=c++14 bmf.cpp -o bmf.riscv -lstdc++ -lm && rv-jit bmf #spike pk main
 #gcc bimorph.cpp -o bimorph.x86-64 -static -v -std=c++14 -lstdc++ -lm && ./bimorph.x86-64
-gcc bimorph.cpp -lstdc++ -std=c++17 -lm -lOpenCL -o bimorph.x86-64 && ./bimorph.x86-64
+echo -e "\n======================================================================="
+echo -e "=========================== gcc bimorph.cpp ==========================="
+echo -e "=======================================================================\n"
+gcc bimorph.cpp -lstdc++ -std=c++17 -lm -lpthread -lOpenCL -o bimorph.x86-64 && ./bimorph.x86-64
 

@@ -12,17 +12,18 @@
 #include <bitset>
 #include <cassert>
 
-#define CL_HPP_MINIMUM_OPENCL_VERSION 110
-#define CL_HPP_TARGET_OPENCL_VERSION 210
-#define CL_HPP_CL_1_2_DEFAULT_BUILD
-#define CL_USE_DEPRECATED_OPENCL_2_0_APIS
-#include "CL/cl2.hpp"
+//#define CL_HPP_MINIMUM_OPENCL_VERSION 110
+//#define CL_HPP_TARGET_OPENCL_VERSION 210
+//#define CL_HPP_CL_1_2_DEFAULT_BUILD
+//#define CL_USE_DEPRECATED_OPENCL_2_0_APIS
+//#include "CL/cl2.hpp"
 
+//https://blog.tartanllama.xyz/sycl/
 //#include <sycl/execution_policy>
 //#include <experimental/algorithm>
 //#include <sycl/helpers/sycl_buffers.hpp>
 
-//#include <CL/sycl.hpp>
+#include <CL/sycl.hpp>
 
 using namespace std;
 
@@ -56,27 +57,51 @@ class Bimorph{
 		if(File()){ mpre("ОШИБКА подключения файла", __LINE__);
 		}else{ //mpre("Создание класса Bimorph", __LINE__);
 		}
+	} public: bool Test(int id){ // Тест доступа класса из видеокарт
+		std::cout << "<" << id << ">";
+		return false;
 	} public: bool Val(int val = -1){ mpre("Расчет значения val=" +to_string(val), __LINE__);
 		if([&](){ // Первоначальная ступень
 			if(stairs.size()){ mpre("ОШИБКА стек не пуст", __LINE__);
 			}else if(!Addr()){ mpre("ОШИБКА расчета следующего адреса", __LINE__);
-			}else if([&](){ stairs.push(stair); return !stairs.size(); }()){ mpre("ОШИБКА установки первоначалной ступени", __LINE__);
+			}else if(stairs.push(stair); !stairs.size()){ mpre("ОШИБКА установки первоначалной ступени", __LINE__);
 			}else{ //mpre(stair, "Первоначальная ступень", __LINE__);
 			} return stair.addr.none(); }()){ mpre("ОШИБКА загрузки первоначального адреса", __LINE__);
-		}else if([&](){
-			int loop = 0; Taddr addr; Toffset offset;
-			while(stairs.size() && (3 > loop++)){
-				Tstair stair = this->stair;
-				if(!Addr(1)){ mpre("ОШИБКА получения следующего адреса", __LINE__);
-				}else if([&](){ // Добавление новой ступени
-					if(stair.addr.none()){ mpre("Некорректный адрес ступени", __LINE__);
-					}else if([&](){ stairs.push(stair); return !stairs.size(); }()){ mpre("ОШИБКА добавления ступени в лестницу", __LINE__);
-					}else{ //mpre("Добавление новой ступени", __LINE__);
-					} return stairs.empty(); }()){ mpre("ОШИБКА установки новой ступени", __LINE__);
-				}else{ mpre("Расчет offset=" +stair.offset.to_string() +" addr=" +stair.addr.to_string() +" block.size=" +to_string(sizeof(stair.addr)), __LINE__);
-				}
-			}; return false; }()){ mpre("ОШИБКА перебора лестницы", __LINE__);
-		}else if(!Block(0)){ mpre("ОШИБКА загрузки буфера", __LINE__);
+		}else if([&](){ // Расчет лестницы
+			if(int data[BLOCK_SIZE]; false){ mpre("ОШИБКА установки буфера расчета", __LINE__);
+			}else if([&](){
+				if(cl::sycl::queue queue; false){ mpre("ОШИБКА инициализации очереди", __LINE__);
+				}else if(cl::sycl::buffer<int, 1> bufer {data ,cl::sycl::range<1>{BLOCK_SIZE}}; false){ mpre("ОШИБКА создания буфера", __LINE__);
+				}else if(auto platforms = cl::sycl::platform::get_platforms(); (1 != platforms.size())){ mpre("ОШИБКА платформы OpenCL для расчетов не найдены", __LINE__);
+				}else if([&](){ for(auto platform:platforms){ // Отображение информации о платформах
+						if(auto name = platform.get_info< cl::sycl::info::platform::name>(); (0 >= name.length())){ mpre("ОШИБКА определения имени платформы", __LINE__);
+						}else if(auto version = platform.get_info< cl::sycl::info::platform::version>(); (0 >= version.length())){ mpre("ОШИБКА определения версии продукта", __LINE__);
+						}else if(auto vendor = platform.get_info< cl::sycl::info::platform::vendor>(); (0 >= vendor.length())){ mpre("ОШИБКА определения версии продукта", __LINE__);
+						}else{ mpre("Платформа `" + name+"` " +vendor +" v" +version , __LINE__);
+						}
+					} return false; }()){ mpre("ОШИБКА отображения информации о платформах", __LINE__);
+				}else if(int max_work_group_size = queue.get_device().get_info<cl::sycl::info::device::max_work_group_size>(); (0 >= max_work_group_size)){ mpre("ОШИБКА расчетоа размера группы", __LINE__);
+				}else if(int local_mem_size = queue.get_device().get_info<cl::sycl::info::device::local_mem_size>(); (0 >= local_mem_size)){ mpre("ОШИБКА получения размера локальной памяти", __LINE__);
+				}else if(mpre("Размер локальной памяти " + to_string(local_mem_size) ,__LINE__); false){ mpre("ОШИБКА отображения размера локальной памяти", __LINE__);
+				}else{ //mpre("Непосредственно расчеты", __LINE__);
+					queue.submit([&](cl::sycl::handler& cgh){ // Запуск расчетов
+						auto result = bufer.get_access<cl::sycl::access::mode::discard_write>(cgh);
+						cgh.parallel_for<class simple_test>(cl::sycl::nd_range<1> (cl::sycl::range<1>{BLOCK_SIZE}, cl::sycl::range<1>{BLOCK_SIZE}), [=](cl::sycl::nd_item<1> item) {
+							int gid = item.get_global_id(0);
+							int lid = item.get_local_id(0);
+							int wid = item.get_group(0);
+							//local_mem[lid] = result[gid];
+							//cout << "[" << gid << "." << lid << "." << wid << "]=" << result[gid] << " ";
+							result[gid] = lid;
+						});
+					});
+				}; return false; }()){ mpre("ОШИБКА запуска расчетов", __LINE__);
+			}else if([&](){
+				for(int i = 0; i < BLOCK_SIZE; i++){ // Вывод результатов расчета
+					std::cout << "data[" << i << "]=" << data[i] << " ";
+				} std::cout << endl; return false; }()){ mpre("ОШИБКА выводов расчетов", __LINE__);
+			}else{
+			} return false; }()){ mpre("ОШИБКА перебора лестницы", __LINE__);
 		}else{ mpre("Расчет закончен", __LINE__);
 		} return false;
 	} private: int Addr(bool next = false){ //mpre("Расчет следующего адреса", __LINE__);
