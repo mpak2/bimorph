@@ -12,11 +12,17 @@
 #include <bitset>
 #include <cassert>
 
-/*#define CL_HPP_MINIMUM_OPENCL_VERSION 110
+#define CL_HPP_MINIMUM_OPENCL_VERSION 110
 #define CL_HPP_TARGET_OPENCL_VERSION 210
 #define CL_HPP_CL_1_2_DEFAULT_BUILD
-//#define CL_USE_DEPRECATED_OPENCL_2_0_APIS
-#include "CL/cl2.hpp"*/
+#define CL_USE_DEPRECATED_OPENCL_2_0_APIS
+#include "CL/cl2.hpp"
+
+//#include <sycl/execution_policy>
+//#include <experimental/algorithm>
+//#include <sycl/helpers/sycl_buffers.hpp>
+
+//#include <CL/sycl.hpp>
 
 using namespace std;
 
@@ -78,24 +84,24 @@ class Bimorph{
 		if([&](){ addr = stair.addr; return false; }()){ mpre("ОШИБКА Обнуление адреса", __LINE__);
 		}else if([&](){ for(int i = addr.size()-2; i >= 0; i--){ // Изменение адреса
 			if(!stair.addr.test(i)){ //mpre("Проверка адреса "+ to_string(i), __LINE__);
-			}else if([&](){ addr.set(i+1); return !addr.test(i+1); }()){ mpre("ОШИБКА установки следующего бита " +to_string(i), __LINE__);
-			}else if([&](){ (next ? addr.set(i) : addr.reset(i)); return !addr.test(i+1); }()){ mpre("ОШИБКА установки следующего бита " +to_string(i), __LINE__);
-			}else if([&](){ stair.addr = addr; return addr.none(); }()){ mpre("ОШИБКА установки расчетного адреса в ступень", __LINE__);
+			}else if(addr.set(i+1); !addr.test(i+1)){ mpre("ОШИБКА установки следующего бита " +to_string(i), __LINE__);
+			}else if((next ? addr.set(i) : addr.reset(i)); !addr.test(i+1)){ mpre("ОШИБКА установки следующего бита " +to_string(i), __LINE__);
+			}else if(stair.addr = addr; addr.none()){ mpre("ОШИБКА установки расчетного адреса в ступень", __LINE__);
 			}else{ //mpre(stair, "Изменение бита " +to_string(i), __LINE__); //mpre("Совпадение бита " +to_string(i), __LINE__);
 			} } return false; }()){ mpre("ОШИБКА Средняя часть адреса " +stair.addr.to_string(), __LINE__);
 		}else if([&](){ // Перегрузка блока
 			if(false){ mpre("Пропускаем перезагрузку блока", __LINE__);
 			}else if(!addr.none()){ //mpre("Не перегружаем буфер", __LINE__);
-			}else if([&](){ addr = 1; return false; }()){ mpre("ОШИБКА обнуления адреса", __LINE__);
-			}else if([&](){ addr.reset(addr.size()-1); return false; }()){ mpre("ОШИБКА получения адреса ссылки", __LINE__);
-			}else if([&](){ stair.addr = addr; return addr.none(); }()){ mpre("ОШИБКА установки адреса ступени", __LINE__);
+			}else if(addr = 1; false){ mpre("ОШИБКА обнуления адреса", __LINE__);
+			}else if(addr.reset(addr.size()-1); false){ mpre("ОШИБКА получения адреса ссылки", __LINE__);
+			}else if(stair.addr = addr; addr.none()){ mpre("ОШИБКА установки адреса ступени", __LINE__);
 			}else if(!this->Block(offset)){ mpre("ОШИБКА загрузки буфера", __LINE__);
 			}else{ //mpre("Загружаем буфер " +to_string(this->offset.to_ulong()) +" size="+ to_string(sizeof(this->block)), __LINE__);
 			} return this->stair.addr.none(); }()){ mpre("ОШИБКА недопустимый адрес " +stair.addr.to_string(), __LINE__);
 		}else{ //mpre("ОШИБКА Расчет адреса "+ this->addr.to_string(), __LINE__);
 		} return true;
 	} private: bool File(){
-		if([&](){ file =fopen(file_name.c_str() ,"r+"); return (NULL == file); }()){ mpre("ОШИБКА открытия фала на запись", __LINE__);
+		if(file =fopen(file_name.c_str() ,"r+"); NULL == file){ mpre("ОШИБКА открытия фала на запись", __LINE__);
 		}else{ return false; //mpre("Файл открыт для изменений", __LINE__);
 		} return true;
 	} private: bool Block(Toffset offset, bool save = false){ // Буфер по адресу
@@ -103,25 +109,25 @@ class Bimorph{
 			int file_size;
 			if(save){ //mpre("Запись уже включена", __LINE__);
 			}else if(fseek(file, 0, SEEK_END)){ mpre("ОШИБКА установка указателя в конец файла", __LINE__);
-			}else if([&](){ file_size = ftell(file); return false; }()){ mpre("ОШИБКА определения размера файла", __LINE__);
+			}else if(file_size = ftell(file); false){ mpre("ОШИБКА определения размера файла", __LINE__);
 			}else if(file_size >= (offset.to_ulong() +1) *sizeof(this->block)){ //mpre("Буфер уже присутствует в файле", __LINE__);
 			}else if(file_size != offset.to_ulong() *sizeof(this->block)){ mpre("ОШИБКА размер файла не равен предыдущему блоку", __LINE__);
-			}else if([&](){ return !(save = true); }()){ mpre("ОШИБКА установки нового буфера", __LINE__);
+			}else if(!(save = true)){ mpre("ОШИБКА установки нового буфера", __LINE__);
 			}else{ mpre("Добавляем новый блок " +to_string(file_size), __LINE__);
 			} return false; }()){ mpre("ОШИБКА определения размера файла", __LINE__);
 		}else if([&](){ // Запись данных в файл
 			if(!save){ //mpre("Пропускаем запись данных", __LINE__);
-			}else if([&](){ int s = fseek(file, stair.offset.to_ulong() *sizeof(block), SEEK_SET); return (0 != s); }()){ mpre("ОШИБКА установки смещения в файле", __LINE__);
-			}else if([&](){ int s = fwrite(block, 1, sizeof(block), file); return (0 >s);  }()){ mpre("ОШИБКА выборки буфера из файла", __LINE__);
+			}else if(int s = fseek(file, stair.offset.to_ulong() *sizeof(block), SEEK_SET); (0 != s)){ mpre("ОШИБКА установки смещения в файле", __LINE__);
+			}else if(int s = fwrite(block, 1, sizeof(block), file); (0 >s)){ mpre("ОШИБКА выборки буфера из файла", __LINE__);
 			}else{ mpre("Запись данных в файл " +to_string(stair.offset.to_ulong()), __LINE__);
 			} return false; }()){ mpre("ОШИБКА чтения данных из файла", __LINE__);
 		}else if([&](){ // Чтение данных из файла
 			if(save){ //mpre("Пропускаем чтение данных", __LINE__);
-			}else if([&](){ int s = fseek(file, stair.offset.to_ulong() *sizeof(block), SEEK_SET); return (0 != s); }()){ mpre("ОШИБКА установки смещения в файле", __LINE__);
-			}else if([&](){ int s = fread(block, 1, sizeof(block), file); return (0 >s);  }()){ mpre("ОШИБКА выборки буфера из файла", __LINE__);
+			}else if(int s = fseek(file, stair.offset.to_ulong() *sizeof(block), SEEK_SET); (0 != s)){ mpre("ОШИБКА установки смещения в файле", __LINE__);
+			}else if(int s = fread(block, 1, sizeof(block), file); (0 >s)){ mpre("ОШИБКА выборки буфера из файла", __LINE__);
 			}else{ mpre("Чтение данных из файла offset=" +to_string(stair.offset.to_ulong()) +" size=" +to_string(sizeof(block)), __LINE__);
 			} return false; }()){ mpre("ОШИБКА чтения данных из файла", __LINE__);
-		}else if([&](){ stair.offset = offset; return false; }()){ mpre("ОШИБКА установки адреса сохранения", __LINE__);
+		}else if(stair.offset = offset; false){ mpre("ОШИБКА установки адреса сохранения", __LINE__);
 		}else{ //mpre("Успешная выборка буфера", __LINE__);
 			return true;
 		} return false;
