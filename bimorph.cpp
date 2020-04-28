@@ -38,10 +38,7 @@ typedef bitset<32> Taddr;
 typedef bitset<32> Toffset;
 typedef Taddr Tblock[BLOCK_SIZE]; // Буфер морфов
 
-struct Tstair{
-	Taddr addr = 0; // Адрес морфа в буфере
-	Toffset offset = 0; // Адрес буфера
-};
+struct Tstair{ Taddr addr = 0; Toffset offset = 0; };
 
 #include "bimorph.c"
 
@@ -83,21 +80,20 @@ class Bimorph{
 				}else if(int max_work_group_size = queue.get_device().get_info<cl::sycl::info::device::max_work_group_size>(); (0 >= max_work_group_size)){ mpre("ОШИБКА расчетоа размера группы", __LINE__);
 				}else if(int local_mem_size = queue.get_device().get_info<cl::sycl::info::device::local_mem_size>(); (0 >= local_mem_size)){ mpre("ОШИБКА получения размера локальной памяти", __LINE__);
 				}else if(mpre("Размер локальной памяти " + to_string(local_mem_size) ,__LINE__); false){ mpre("ОШИБКА отображения размера локальной памяти", __LINE__);
-				}else{ //mpre("Непосредственно расчеты", __LINE__);
+				}else{ //mpre("Непосредственно расчеты в ядре устройств", __LINE__);
 					queue.submit([&](cl::sycl::handler& cgh){ // Запуск расчетов
 						auto result = bufer.get_access<cl::sycl::access::mode::discard_write>(cgh);
 						cgh.parallel_for<class simple_test>(cl::sycl::nd_range<1> (cl::sycl::range<1>{BLOCK_SIZE}, cl::sycl::range<1>{BLOCK_SIZE}), [=](cl::sycl::nd_item<1> item) {
-							int gid = item.get_global_id(0);
-							int lid = item.get_local_id(0);
-							int wid = item.get_group(0);
-							//local_mem[lid] = result[gid];
-							//cout << "[" << gid << "." << lid << "." << wid << "]=" << result[gid] << " ";
-							result[gid] = lid;
+							if(int global_id = item.get_global_id(0); (0 > global_id)){ mpre("ОШИБКА получения группового идентификатора", __LINE__);
+							}else if(int local_id = item.get_local_id(0); (0 > local_id)){ mpre("ОШИБКА получения локального идентификатора", __LINE__);
+							}else if(int group_id = item.get_group(0); (0 > group_id)){ mpre("ОШИБКА получения группового идентификатора", __LINE__);
+							}else if(result[local_id] = local_id; false){ mpre("Расчет результата", __LINE__);
+							}else{ //cout << "[" << gid << "." << lid << "." << wid << "]=" << result[gid] << " ";
+							}
 						});
 					});
 				}; return false; }()){ mpre("ОШИБКА запуска расчетов", __LINE__);
-			}else if([&](){
-				for(int i = 0; i < BLOCK_SIZE; i++){ // Вывод результатов расчета
+			}else if([&](){ for(int i = 0; i < BLOCK_SIZE; i++){ // Вывод результатов расчета
 					std::cout << "data[" << i << "]=" << data[i] << " ";
 				} std::cout << endl; return false; }()){ mpre("ОШИБКА выводов расчетов", __LINE__);
 			}else{
@@ -105,8 +101,8 @@ class Bimorph{
 		}else{ mpre("Расчет закончен", __LINE__);
 		} return false;
 	} private: int Addr(bool next = false){ //mpre("Расчет следующего адреса", __LINE__);
-		Toffset offset; Taddr addr;
-		if([&](){ addr = stair.addr; return false; }()){ mpre("ОШИБКА Обнуление адреса", __LINE__);
+		if(Taddr addr = stair.addr; false){ mpre("ОШИБКА Обнуление адреса", __LINE__);
+		}else if(Toffset offset = stair.offset; false){ mpre("ОШИБКА установки локального смещения", __LINE__);
 		}else if([&](){ for(int i = addr.size()-2; i >= 0; i--){ // Изменение адреса
 			if(!stair.addr.test(i)){ //mpre("Проверка адреса "+ to_string(i), __LINE__);
 			}else if(addr.set(i+1); !addr.test(i+1)){ mpre("ОШИБКА установки следующего бита " +to_string(i), __LINE__);
@@ -125,16 +121,15 @@ class Bimorph{
 			} return this->stair.addr.none(); }()){ mpre("ОШИБКА недопустимый адрес " +stair.addr.to_string(), __LINE__);
 		}else{ //mpre("ОШИБКА Расчет адреса "+ this->addr.to_string(), __LINE__);
 		} return true;
-	} private: bool File(){
+	} private: bool File(){ // Загрузка данных из файла
 		if(file =fopen(file_name.c_str() ,"r+"); NULL == file){ mpre("ОШИБКА открытия фала на запись", __LINE__);
 		}else{ return false; //mpre("Файл открыт для изменений", __LINE__);
 		} return true;
 	} private: bool Block(Toffset offset, bool save = false){ // Буфер по адресу
 		if([&](){ // Определение размера файла
-			int file_size;
 			if(save){ //mpre("Запись уже включена", __LINE__);
 			}else if(fseek(file, 0, SEEK_END)){ mpre("ОШИБКА установка указателя в конец файла", __LINE__);
-			}else if(file_size = ftell(file); false){ mpre("ОШИБКА определения размера файла", __LINE__);
+			}else if(int file_size = ftell(file); false){ mpre("ОШИБКА определения размера файла", __LINE__);
 			}else if(file_size >= (offset.to_ulong() +1) *sizeof(this->block)){ //mpre("Буфер уже присутствует в файле", __LINE__);
 			}else if(file_size != offset.to_ulong() *sizeof(this->block)){ mpre("ОШИБКА размер файла не равен предыдущему блоку", __LINE__);
 			}else if(!(save = true)){ mpre("ОШИБКА установки нового буфера", __LINE__);
