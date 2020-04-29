@@ -19,11 +19,11 @@
 //#include "CL/cl2.hpp"
 
 //https://blog.tartanllama.xyz/sycl/
-//#include <sycl/execution_policy>
-//#include <experimental/algorithm>
-//#include <sycl/helpers/sycl_buffers.hpp>
+#include <sycl/execution_policy>
+#include <experimental/algorithm>
+#include <sycl/helpers/sycl_buffers.hpp>
 
-#include <CL/sycl.hpp>
+//#include <CL/sycl.hpp>
 //using namespace cl::sycl;
 //using namespace std;
 
