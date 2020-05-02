@@ -19,11 +19,11 @@
 //#include "CL/cl2.hpp"
 
 //https://blog.tartanllama.xyz/sycl/
-#include <sycl/execution_policy>
-#include <experimental/algorithm>
-#include <sycl/helpers/sycl_buffers.hpp>
+//#include <sycl/execution_policy>
+//#include <experimental/algorithm>
+//#include <sycl/helpers/sycl_buffers.hpp>
 
-//#include <CL/sycl.hpp>
+#include <CL/sycl.hpp>
 //using namespace cl::sycl;
 //using namespace std;
 
@@ -90,10 +90,10 @@ class Bimorph{
 						}else{ 
 						}
 					} return false; }()){ mpre("ОШИБКА отображения информации о платформах", __LINE__);
-				}else if(int max_work_group_size = queue.get_device().get_info<cl::sycl::info::device::max_work_group_size>(); (0 >= max_work_group_size)){ mpre("ОШИБКА расчетоа размера группы", __LINE__);
+				/*}else if(int max_work_group_size = queue.get_device().get_info<cl::sycl::info::device::max_work_group_size>(); (0 >= max_work_group_size)){ mpre("ОШИБКА расчетоа размера группы", __LINE__);
 				}else if(int local_mem_size = queue.get_device().get_info<cl::sycl::info::device::local_mem_size>(); (0 >= local_mem_size)){ mpre("ОШИБКА получения размера локальной памяти", __LINE__);
-				}else if(mpre("Размер локальной памяти " + std::to_string(local_mem_size) ,__LINE__); false){ mpre("ОШИБКА отображения размера локальной памяти", __LINE__);
-				}else{ //mpre("Непосредственно расчеты в ядре устройств", __LINE__);
+				}else if(mpre("Размер локальной памяти " + std::to_string(local_mem_size) ,__LINE__); false){ mpre("ОШИБКА отображения размера локальной памяти", __LINE__);a
+				}else if([&](){ // Установка функции в ядро
 					queue.submit([&](cl::sycl::handler& cgh){ // Запуск расчетов
 						auto result = bufer.get_access<cl::sycl::access::mode::discard_write>(cgh);
 						cgh.parallel_for<class simple_test>(cl::sycl::nd_range<1> (cl::sycl::range<1>{BLOCK_SIZE}, cl::sycl::range<1>{BLOCK_SIZE}), [=](cl::sycl::nd_item<1> item) {
@@ -103,17 +103,15 @@ class Bimorph{
 							//}else if(result[local_id] = (0 == local_id ? result[local_id] : local_id); false){ mpre("Расчет результата", __LINE__);
 							}else if(long sum = 0; false){ mpre("ОШИБКА заведения локальной памяти", __LINE__);
 							}else{ //cout << "[" << gid << "." << lid << "." << wid << "]=" << result[gid] << " ";
-								for(int i =0; i<1e8; i++){
+								for(int i =0; i<1e7; i++){
 									sum += 1;
 								} result[0] +=sum;
 								std::cout << "[" << global_id << "." << local_id << "." << group_id << "]=" << sum << " ";
 							}
 						});
-					});
+					}); return false; }()){ mpre("ОШИБКА расчета", __LINE__);*/
+				}else{ //mpre("Непосредственно расчеты в ядре устройств", __LINE__);
 				}; return false; }()){ mpre("ОШИБКА запуска расчетов", __LINE__);
-			/*}else if([&](){ for(int i = 0; i < BLOCK_SIZE; i++){ // Вывод результатов расчета
-					std::cout << "data[" << i << "]=" << data[i] << " ";
-				} std::cout << endl; return false; }()){ mpre("ОШИБКА выводов расчетов", __LINE__);*/
 			}else{ std::cout << std::endl;
 			} return false; }()){ mpre("ОШИБКА перебора лестницы", __LINE__);
 		}else{ mpre("Расчет закончен", __LINE__);
@@ -158,6 +156,7 @@ class Bimorph{
 			}else if(int s = fseek(file, stair.offset.to_ulong() *sizeof(block), SEEK_SET); (0 != s)){ mpre("ОШИБКА установки смещения в файле", __LINE__);
 			}else if(int s = fwrite(block, 1, sizeof(block), file); (0 >s)){ mpre("ОШИБКА выборки буфера из файла", __LINE__);
 			}else{ mpre("Запись данных в файл " +std::to_string(stair.offset.to_ulong()), __LINE__);
+				//namespace test { mpre("Проверка", __LINE__); }
 			} return false; }()){ mpre("ОШИБКА чтения данных из файла", __LINE__);
 		}else if([&](){ // Чтение данных из файла
 			if(save){ //mpre("Пропускаем чтение данных", __LINE__);

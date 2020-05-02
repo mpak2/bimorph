@@ -1,6 +1,9 @@
 #!/bin/bash
 #gcc bmf.cpp -lstdc++ -Wreturn-local-addr -lsqlite3 -Wwrite-strings -std=c++14 -lstdc++fs -lm -lpthread -o bmf && bash bmf.sh
 
+# Docjer
+#sudo apt-get install module-init-tools
+
 #riscv64-unknown-elf-gcc -static -mcmodel=medany -fvisibility=hidden -nostdlib -nostartfiles -march=rv64im -mabi=lp64 test.s -o test.elf && spike pk test.elf
 #riscv64-unknown-elf-gcc -static -lstdc++ -Wreturn-local-addr -Wwrite-strings -std=c++14 -lm -v -o main.asm main.cpp
 #riscv64-linux-gnu-gcc -v -o main main.cpp && rv-jit main
@@ -13,5 +16,5 @@
 echo -e "\n======================================================================="
 echo -e "=========================== gcc bimorph.cpp ==========================="
 echo -e "=======================================================================\n"
-gcc bimorph.cpp -lstdc++ -std=c++17 -lm -lpthread -lOpenCL -o bimorph.x86-64 && ./bimorph.x86-64
+gcc bimorph.cpp -lstdc++ -std=c++17 -lm -lpthread -o bimorph.x86-64 && ./bimorph.x86-64
 
