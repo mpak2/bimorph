@@ -16,5 +16,6 @@
 echo -e "\n======================================================================="
 echo -e "=========================== gcc bimorph.cpp ==========================="
 echo -e "=======================================================================\n"
-gcc bimorph.cpp -lstdc++ -std=c++17 -lm -lpthread -o bimorph.x86-64 && ./bimorph.x86-64
+#dpcpp -fsycl-unnamed-lambda bimorph.cpp -std=c++17 -o bimorph.x86-64
+gcc bimorph.cpp -v -H -lstdc++ -std=c++17 -lm -lpthread -lsycl -o bimorph.x86-64 && ./bimorph.x86-64
 

@@ -24,7 +24,7 @@
 //#include <sycl/helpers/sycl_buffers.hpp>
 
 #include <CL/sycl.hpp>
-//using namespace cl::sycl;
+using namespace cl::sycl;
 //using namespace std;
 
 typedef std::map<std::string, std::string> TMs;
@@ -68,8 +68,9 @@ class Bimorph{
 			if(long data[BLOCK_SIZE]; false){ mpre("ОШИБКА установки буфера расчета", __LINE__);
 			}else if([&](){
 				if(cl::sycl::queue queue; false){ mpre("ОШИБКА инициализации очереди", __LINE__);
-				}else if(cl::sycl::buffer<long, 1> bufer {data ,cl::sycl::range<1>{BLOCK_SIZE}}; false){ mpre("ОШИБКА создания буфера", __LINE__);
-				}else if(auto platforms = cl::sycl::platform::get_platforms(); (1 != platforms.size())){ mpre("ОШИБКА платформы OpenCL для расчетов не найдены", __LINE__);
+				//if(cl::sycl::queue gpuQueue{gpu_selector{}}; false){ mpre("ОШИБКА инициализации очереди", __LINE__);
+				//}else if(cl::sycl::buffer<long, 1> bufer {data ,cl::sycl::range<1>{BLOCK_SIZE}}; false){ mpre("ОШИБКА создания буфера", __LINE__);
+				/*}else if(auto platforms = cl::sycl::platform::get_platforms(); (1 != platforms.size())){ mpre("ОШИБКА платформы OpenCL для расчетов не найдены", __LINE__);
 				}else if([&](){ for(auto platform:platforms){ // Отображение информации о платформах
 						if(auto platform_name = platform.get_info<cl::sycl::info::platform::name>(); (0 >= platform_name.length())){ mpre("ОШИБКА определения имени платформы", __LINE__);
 						}else if(auto version = platform.get_info<cl::sycl::info::platform::version>(); (0 >= version.length())){ mpre("ОШИБКА определения версии продукта", __LINE__);
@@ -78,7 +79,7 @@ class Bimorph{
 						}else if(mpre("Платформа `" + platform_name+"` " +vendor +" (" +std::to_string(devices.size()) +") v" +version , __LINE__); false){ mpre("ОШИБКА вывода свойст вплатформы", __LINE__);
 						}else if([&](){ for(auto device:devices){ // Вывод свойств оборудования
 								if(false){ mpre("Пропуск", __LINE__);
-    							}else if(std::string type = [&](std::string type = ""){
+								}else if(std::string type = [&](std::string type = ""){
 										if(device.is_cpu()){ type = "cpu"; //mpre("Тип устройства определен как " +type, __LINE__);
 										}else if(device.is_gpu()){ type = "gpu"; //mpre("Тип устройства определен как " +type, __LINE__);
 										}else{ type = "host"; //mpre("Тип устройства не определен "+ type, __LINE__);
@@ -90,7 +91,7 @@ class Bimorph{
 						}else{ 
 						}
 					} return false; }()){ mpre("ОШИБКА отображения информации о платформах", __LINE__);
-				/*}else if(int max_work_group_size = queue.get_device().get_info<cl::sycl::info::device::max_work_group_size>(); (0 >= max_work_group_size)){ mpre("ОШИБКА расчетоа размера группы", __LINE__);
+				}else if(int max_work_group_size = queue.get_device().get_info<cl::sycl::info::device::max_work_group_size>(); (0 >= max_work_group_size)){ mpre("ОШИБКА расчетоа размера группы", __LINE__);
 				}else if(int local_mem_size = queue.get_device().get_info<cl::sycl::info::device::local_mem_size>(); (0 >= local_mem_size)){ mpre("ОШИБКА получения размера локальной памяти", __LINE__);
 				}else if(mpre("Размер локальной памяти " + std::to_string(local_mem_size) ,__LINE__); false){ mpre("ОШИБКА отображения размера локальной памяти", __LINE__);a
 				}else if([&](){ // Установка функции в ядро
