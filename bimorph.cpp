@@ -24,6 +24,7 @@
 //#include <sycl/helpers/sycl_buffers.hpp>
 
 #include <CL/sycl.hpp>
+//#include "/opt/intel/inteloneapi/compiler/2021.1-beta06/linux/include/sycl/CL/sycl.hpp"
 using namespace cl::sycl;
 //using namespace std;
 
@@ -42,82 +43,121 @@ struct Tstair{ Taddr addr = 0; Toffset offset = 0; };
 
 #include "bimorph.c"
 
+/*class CUDASelector : public sycl::device_selector {
+public:
+  int operator()(const sycl::device &Device) const override {
+    using namespace sycl::info;
+
+    const std::string DriverVersion = Device.get_info<cl::sycl::info::device::driver_version>();
+
+    if (Device.is_gpu() && (DriverVersion.find("CUDA") != std::string::npos)) {
+      std::cout << " GPU device found " << std::endl;
+		return 1;
+    }else{
+		return -1;
+	 }
+  }
+};*/
+
 class Bimorph{
-	std::string file_name = "bimorph.bin";
-	long int file_size = 0;
-	FILE *file;
 	Tblock block; // Буфер блоков с адресами переходов
 	Tstair stair; // Текущая ступень
 	std::stack <Tstair> stairs; // Список ступеней
 
 	public: Bimorph(){
-		if(File()){ mpre("ОШИБКА подключения файла", __LINE__);
+		/*if(File()){ mpre("ОШИБКА подключения файла", __LINE__);
 		}else{ //mpre("Создание класса Bimorph", __LINE__);
-		}
-	} public: bool Test(int id){ // Тест доступа класса из видеокарт
-		std::cout << "<" << id << ">";
+		}*/
+	} public: bool Test(std::string name){
+		mpre(name, __LINE__);
 		return false;
 	} public: bool Val(int val = -1){ mpre("Расчет значения val=" +std::to_string(val), __LINE__);
-		if([&](){ // Первоначальная ступень
-			if(stairs.size()){ mpre("ОШИБКА стек не пуст", __LINE__);
-			}else if(!Addr()){ mpre("ОШИБКА расчета следующего адреса", __LINE__);
-			}else if(stairs.push(stair); !stairs.size()){ mpre("ОШИБКА установки первоначалной ступени", __LINE__);
-			}else{ //mpre(stair, "Первоначальная ступень", __LINE__);
-			} return stair.addr.none(); }()){ mpre("ОШИБКА загрузки первоначального адреса", __LINE__);
-		}else if([&](){ // Расчет лестницы
-			if(long data[BLOCK_SIZE]; false){ mpre("ОШИБКА установки буфера расчета", __LINE__);
-			}else if([&](){
-				if(cl::sycl::queue queue; false){ mpre("ОШИБКА инициализации очереди", __LINE__);
-				//if(cl::sycl::queue gpuQueue{gpu_selector{}}; false){ mpre("ОШИБКА инициализации очереди", __LINE__);
-				//}else if(cl::sycl::buffer<long, 1> bufer {data ,cl::sycl::range<1>{BLOCK_SIZE}}; false){ mpre("ОШИБКА создания буфера", __LINE__);
-				/*}else if(auto platforms = cl::sycl::platform::get_platforms(); (1 != platforms.size())){ mpre("ОШИБКА платформы OpenCL для расчетов не найдены", __LINE__);
-				}else if([&](){ for(auto platform:platforms){ // Отображение информации о платформах
-						if(auto platform_name = platform.get_info<cl::sycl::info::platform::name>(); (0 >= platform_name.length())){ mpre("ОШИБКА определения имени платформы", __LINE__);
-						}else if(auto version = platform.get_info<cl::sycl::info::platform::version>(); (0 >= version.length())){ mpre("ОШИБКА определения версии продукта", __LINE__);
-						}else if(auto vendor = platform.get_info<cl::sycl::info::platform::vendor>(); (0 >= vendor.length())){ mpre("ОШИБКА определения версии продукта", __LINE__);
-						}else if(auto devices = platform.get_devices(); (1 > devices.size())){ mpre("ОШИБКА оборудование у платформы не найдено", __LINE__);
-						}else if(mpre("Платформа `" + platform_name+"` " +vendor +" (" +std::to_string(devices.size()) +") v" +version , __LINE__); false){ mpre("ОШИБКА вывода свойст вплатформы", __LINE__);
-						}else if([&](){ for(auto device:devices){ // Вывод свойств оборудования
-								if(false){ mpre("Пропуск", __LINE__);
-								}else if(std::string type = [&](std::string type = ""){
-										if(device.is_cpu()){ type = "cpu"; //mpre("Тип устройства определен как " +type, __LINE__);
-										}else if(device.is_gpu()){ type = "gpu"; //mpre("Тип устройства определен как " +type, __LINE__);
-										}else{ type = "host"; //mpre("Тип устройства не определен "+ type, __LINE__);
-										} return type; }(); false){ mpre("ОШИБКА получения типа оборудования", __LINE__);
-								}else if(int max_work_group_size = device.get_info<cl::sycl::info::device::max_work_group_size>(); (0 >= max_work_group_size)){ mpre("ОШИБКА определения размера группы оборудования", __LINE__);
-								}else{ mpre("Оборудование max_work_group_size=" +std::to_string(max_work_group_size) + " type=" +type , __LINE__);
-								}
-							} return false; }()){ mpre("ОШИБКА отображения информации об оборудовании", __LINE__);
-						}else{ 
-						}
-					} return false; }()){ mpre("ОШИБКА отображения информации о платформах", __LINE__);
-				}else if(int max_work_group_size = queue.get_device().get_info<cl::sycl::info::device::max_work_group_size>(); (0 >= max_work_group_size)){ mpre("ОШИБКА расчетоа размера группы", __LINE__);
-				}else if(int local_mem_size = queue.get_device().get_info<cl::sycl::info::device::local_mem_size>(); (0 >= local_mem_size)){ mpre("ОШИБКА получения размера локальной памяти", __LINE__);
-				}else if(mpre("Размер локальной памяти " + std::to_string(local_mem_size) ,__LINE__); false){ mpre("ОШИБКА отображения размера локальной памяти", __LINE__);a
-				}else if([&](){ // Установка функции в ядро
-					queue.submit([&](cl::sycl::handler& cgh){ // Запуск расчетов
-						auto result = bufer.get_access<cl::sycl::access::mode::discard_write>(cgh);
-						cgh.parallel_for<class simple_test>(cl::sycl::nd_range<1> (cl::sycl::range<1>{BLOCK_SIZE}, cl::sycl::range<1>{BLOCK_SIZE}), [=](cl::sycl::nd_item<1> item) {
-							if(int global_id = item.get_global_id(0); (0 > global_id)){ mpre("ОШИБКА получения группового идентификатора", __LINE__);
-							}else if(int local_id = item.get_local_id(0); (0 > local_id)){ mpre("ОШИБКА получения локального идентификатора", __LINE__);
-							}else if(int group_id = item.get_group(0); (0 > group_id)){ mpre("ОШИБКА получения группового идентификатора", __LINE__);
-							//}else if(result[local_id] = (0 == local_id ? result[local_id] : local_id); false){ mpre("Расчет результата", __LINE__);
-							}else if(long sum = 0; false){ mpre("ОШИБКА заведения локальной памяти", __LINE__);
-							}else{ //cout << "[" << gid << "." << lid << "." << wid << "]=" << result[gid] << " ";
-								for(int i =0; i<1e7; i++){
-									sum += 1;
-								} result[0] +=sum;
-								std::cout << "[" << global_id << "." << local_id << "." << group_id << "]=" << sum << " ";
+		if(long data[BLOCK_SIZE]; false){ mpre("ОШИБКА установки буфера расчета", __LINE__);
+		}else if([&](){ // Вывод информации об оборудовании
+			if(false){ printf("%d Не выводим информацию об оборудовании", __LINE__);
+			}else if(cl::sycl::buffer<long, 1> bufer {data ,cl::sycl::range<1>{BLOCK_SIZE}}; false){ mpre("ОШИБКА создания буфера", __LINE__);
+			}else if(auto platforms = cl::sycl::platform::get_platforms(); (0 >= platforms.size())){ mpre("ОШИБКА платформы не найдены", __LINE__);
+			}else if([&](){ for(auto platform:platforms){ // Отображение информации о платформах
+					if(auto platform_name = platform.get_info<cl::sycl::info::platform::name>(); (0 >= platform_name.length())){ mpre("ОШИБКА определения имени платформы", __LINE__);
+					}else if(auto version = platform.get_info<cl::sycl::info::platform::version>(); (0 >= version.length())){ mpre("ОШИБКА определения версии продукта", __LINE__);
+					}else if(auto vendor = platform.get_info<cl::sycl::info::platform::vendor>(); (0 > vendor.length())){ mpre("ОШИБКА определения производителя", __LINE__);
+					}else if(auto profile = platform.get_info<cl::sycl::info::platform::profile>(); (0 >= profile.length())){ mpre("ОШИБКА определения профиля", __LINE__);
+					}else if(auto devices = platform.get_devices(); (1 > devices.size())){ mpre("ОШИБКА оборудование у платформы не найдено", __LINE__);
+					}else if(mpre("Платформа `" + platform_name+"` " +vendor +" "+ profile+ " (" +std::to_string(devices.size()) +") v" +version , __LINE__); false){ mpre("ОШИБКА вывода свойст вплатформы", __LINE__);
+					}else if([&](){ for(auto device:devices){ // Вывод свойств оборудования
+							if(false){ mpre("Пропуск", __LINE__);
+							}else if(std::string type = [&](std::string type = ""){
+									if(device.is_cpu()){ type = "cpu"; //mpre("Тип устройства определен как " +type, __LINE__);
+									}else if(device.is_gpu()){ type = "gpu"; //mpre("Тип устройства определен как " +type, __LINE__);
+									}else if(device.is_host()){ type = "host"; //mpre("Тип устройства определен как " +type, __LINE__);
+									}else{ mpre("Тип устройства не определен "+ type, __LINE__);
+									} return type; }(); false){ mpre("ОШИБКА получения типа оборудования", __LINE__);
+							}else if(int max_work_group_size = device.get_info<cl::sycl::info::device::max_work_group_size>(); (0 >= max_work_group_size)){ mpre("ОШИБКА определения размера группы оборудования", __LINE__);
+							}else if(unsigned int global_mem_size = device.get_info<cl::sycl::info::device::global_mem_size>(); false){ mpre("ОШИБКА определения размера глобальной памяти", __LINE__);
+							}else if(int max_compute_units = device.get_info<cl::sycl::info::device::max_compute_units>(); false){ mpre("ОШИБКА определения максимум вычислительных блоков", __LINE__);
+							}else if(int max_work_item_dimensions = device.get_info<cl::sycl::info::device::max_work_item_dimensions>(); false){ mpre("ОШИБКА определения размера рабочего элемента", __LINE__);
+							}else if(int printf_buffer_size = device.get_info<cl::sycl::info::device::printf_buffer_size>(); false){ mpre("ОШИБКА определения размера буфера", __LINE__);
+							}else if(auto driver_version = device.get_info<cl::sycl::info::device::driver_version>(); false){ mpre("ОШИБКА определения версии драйвера", __LINE__);
+							}else{ mpre("\tОборудование max_work_group_size=" +std::to_string(max_work_group_size)
+								+" global_mem_size=" +std::to_string(global_mem_size)
+								+" max_compute_units=" +std::to_string(max_compute_units)
+								+" max_work_item_dimensions="+ std::to_string(max_work_item_dimensions)
+								+" printf_buffer_size="+ std::to_string(printf_buffer_size)
+								+" driver_version="+ driver_version
+								+ " type=" +type ,__LINE__);
 							}
-						});
-					}); return false; }()){ mpre("ОШИБКА расчета", __LINE__);*/
-				}else{ //mpre("Непосредственно расчеты в ядре устройств", __LINE__);
-				}; return false; }()){ mpre("ОШИБКА запуска расчетов", __LINE__);
-			}else{ std::cout << std::endl;
-			} return false; }()){ mpre("ОШИБКА перебора лестницы", __LINE__);
-		}else{ mpre("Расчет закончен", __LINE__);
+						} return false; }()){ mpre("ОШИБКА отображения информации об оборудовании", __LINE__);
+					}else{ 
+					}
+				} return false; }()){ mpre("ОШИБКА отображения информации о платформах", __LINE__);
+			}else{
+			} return false; }()){ mpre("ОШИБКА запуска расчетов", __LINE__);
+		}else if([&](){ // Непосредственно расчеты
+			/*class CUDASelector : public sycl::device_selector {
+				public:
+				  int operator()(const sycl::device &Device) const override {
+					using namespace sycl::info;
+
+					//cl::sycl::device device{ cl::sycl::gpu_selector };
+					auto DriverVersion = Device.get_info<cl::sycl::info::device::driver_version>();
+
+					if (Device.is_gpu()) {
+						std::cout << " GPU device found " << std::endl;
+						return 1;
+					};
+					return -1;
+				  }
+				};*/
+			if(false){ printf("%d Пропускаем расчеты", __LINE__);
+			//}else if(cl::sycl::gpu_selector selector{ }; false){ mpre("ОШИБКА выборка списка оборудования", __LINE__);
+			//}else if(cl::sycl::device devices{ }; false){ mpre("ОШИБКА выбора оборудования", __LINE__);
+			}else if(cl::sycl::queue queue{}; false){ mpre("ОШИБКА инициализации очереди", __LINE__);
+			}else if(const size_t array_size = 256; (0 >= array_size)){ mpre("ОШИБКА размер массива не задан", __LINE__);
+			}else if(double data[array_size]; false){ mpre("ОШИБКА создания массива предварительных данных", __LINE__);
+			}else if(buffer<double, 1> buf{ data, range<1>{array_size} }; false){ mpre("ОШИБКА установки буфера", __LINE__);
+			}else if(std::ifstream file("bimorph.bin", std::ifstream::binary|std::ifstream::ate); !file){ mpre("ОШИБКА открытия файла данных", __LINE__);
+			//}else if(Test("Проверка"); false){ mpre("ОШИБКА проведения теста", __LINE__);
+			}else if(queue.submit([&](handler& h){
+					auto result = buf.get_access<access::mode::write>(h);
+					cl::sycl::stream data(BLOCK_SIZE, BLOCK_SIZE, h);
+					h.parallel_for<class Hi>(range<1>{array_size}, [=](id<1> id){
+						//Test("Проверка");
+						//mpre("Проверка " +std::to_string(id), __LINE__);
+						double sum = 0;
+						for(double i=0; i<1e7; i++){
+							sum+=1;
+						}
+						result[id] = static_cast<int>(sum);
+					});
+				}); false){ mpre("ОШИБКА установки ядра функции", __LINE__);
+			}else if([&](){ for(int i = 0; i < array_size; i++){ std::cout << "data[" << i << "]=" << data[i] << "\t"; }; return false; }()){ mpre("ОШИБКА вывода результатов", __LINE__);
+			}else{ //mpre("Размер файла "+ std::to_string(file_size), __LINE__);
+				std::cout << std::endl << __LINE__ << " Размер файла=" << file.tellg();
+				std::cout << std::endl << __LINE__ << " Выполнение global_mem_size=" << queue.get_device().get_info<cl::sycl::info::device::global_mem_size>() << std::endl;
+			} return false; }()){ printf("%d ОШИБКА расчета", __LINE__);
+		}else{ std::cout << std::endl;
 		} return false;
-	} private: int Addr(bool next = false){ //mpre("Расчет следующего адреса", __LINE__);
+	} /*private: int Addr(bool next = false){ //mpre("Расчет следующего адреса", __LINE__);
 		if(Taddr addr = stair.addr; false){ mpre("ОШИБКА Обнуление адреса", __LINE__);
 		}else if(Toffset offset = stair.offset; false){ mpre("ОШИБКА установки локального смещения", __LINE__);
 		}else if([&](){ for(int i = addr.size()-2; i >= 0; i--){ // Изменение адреса
@@ -169,7 +209,7 @@ class Bimorph{
 		}else{ //mpre("Успешная выборка буфера", __LINE__);
 			return true;
 		} return false;
-	}
+	}*/
 };
 
 int main(int argc, char *argv[]){
